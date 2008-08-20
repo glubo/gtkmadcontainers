@@ -1,0 +1,11 @@
+I had some weird ideas of various containers for Gtk. So I'll try to implement them.
+
+Some of ideas I would like to implement:
+GtkMadCircleBox
+	Widgets will be placed on a circle
+
+GtkMadTableListBox
+	Widgets will be treated little bit like words when typesetted (without word splitting :-)
+
+GtkMadTableMinSize
+	Widgets will be placed in a such wa that they will occupy minimal possible size (without conserving their original order)

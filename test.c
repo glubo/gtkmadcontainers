@@ -12,25 +12,7 @@ static void hello( GtkWidget *widget,
     g_print ("Hello World\n");
 }
 
-static gboolean delete_event( GtkWidget *widget,
-                              GdkEvent  *event,
-                              gpointer   data )
-{
-    /* If you return FALSE in the "delete_event" signal handler,
-     * GTK will emit the "destroy" signal. Returning TRUE means
-     * you don't want the window to be destroyed.
-     * This is useful for popping up 'are you sure you want to quit?'
-     * type dialogs. */
 
-    g_print ("delete event occurred\n");
-
-    /* Change TRUE to FALSE and the main window will be destroyed with
-     * a "delete_event". */
-
-    return TRUE;
-}
-
-/* Another callback */
 static void destroy( GtkWidget *widget,
                      gpointer   data )
 {
@@ -53,17 +35,9 @@ int main( int   argc,
     /* create a new window */
     window = gtk_window_new (GTK_WINDOW_TOPLEVEL);
     
-    /* When the window is given the "delete_event" signal (this is given
-     * by the window manager, usually by the "close" option, or on the
-     * titlebar), we ask it to call the delete_event () function
-     * as defined above. The data passed to the callback
-     * function is NULL and is ignored in the callback function. */
     g_signal_connect (G_OBJECT (window), "delete_event",
-		      G_CALLBACK (delete_event), NULL);
+		      G_CALLBACK (destroy), NULL);
     
-    /* Here we connect the "destroy" event to a signal handler.  
-     * This event occurs when we call gtk_widget_destroy() on the window,
-     * or if we return FALSE in the "delete_event" callback. */
     g_signal_connect (G_OBJECT (window), "destroy",
 		      G_CALLBACK (destroy), NULL);
     
@@ -71,7 +45,7 @@ int main( int   argc,
     gtk_container_set_border_width (GTK_CONTAINER (window), 10);
     
 	 mcb = gtk_madcirclebox_new(TRUE, 0);
-	 for(i=0; i<5; i++){
+	 for(i=0; i<40; i++){
 		 /* Creates a new button with the label "Hello World". */
 		 button = gtk_button_new_with_label ("Hello");
 		 
@@ -89,7 +63,11 @@ int main( int   argc,
 											G_OBJECT (window));
 		 
 		 /* This packs the button into the window (a gtk container). */
-		 gtk_container_add (GTK_CONTAINER (mcb), button);
+		 if(i%2){
+		 	gtk_box_pack_start (GTK_BOX (mcb), button, 1, 0, 0);
+		 }else{
+		 	gtk_box_pack_end (GTK_BOX (mcb), button, 1, 0, 0);
+		 }
 	}
 	 gtk_container_add (GTK_CONTAINER (window), mcb);
     

@@ -209,10 +209,8 @@ gtk_madcirclebox_size_allocate (GtkWidget * widget, GtkAllocation * allocation)
 
 		x = allocation->x + (allocation->width-size)/2;
 		y = allocation->y + (allocation->height-size)/2;
-		printf("%lf\n",sin(M_PI/(double)nvis_children));
 		radius = size/(1.0+sin(M_PI/(double)nvis_children))/2.0;
 		childsize = sqrt(2.0)*radius * sin(M_PI/(double)nvis_children); 
-		printf("w:%d h:%d r:%d cs:%d\n",width, height, radius, childsize);
 
 
 		children = box->children;

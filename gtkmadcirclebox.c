@@ -116,11 +116,14 @@ gtk_madcirclebox_size_allocate (GtkWidget * widget, GtkAllocation * allocation)
 	gint nvis_children;
 	gint nexpand_children;
 	gint child_width;
+	gint child_height;
 	gint width;
 	gint height;
-	gint extra;
 	gint x;
 	gint y;
+	gint cx;
+	gint cy;
+	gint i;
 	gint childsize;
 	gint size;
 	gint radius;
@@ -151,114 +154,76 @@ gtk_madcirclebox_size_allocate (GtkWidget * widget, GtkAllocation * allocation)
 
 		x = allocation->x + (allocation->width-size)/2;
 		y = allocation->y + (allocation->height-size)/2;
-		radius = size/(1.0+tan(M_PI/(double)nvis_children));
+		radius = size/(1.0+tan(M_PI/(double)nvis_children))/2;
 		childsize = radius *tan(M_PI/(double)nvis_children);
+		printf("w:%d h:%d r:%d cs:%d\n",width, height, radius, childsize);
 
 
 		children = box->children;
+		i = 0;
 		while (children) {
 			child = children->data;
 			children = children->next;
 
 			if ((child->pack == GTK_PACK_START)
 		&& GTK_WIDGET_VISIBLE (child->widget)) {
+				GtkRequisition child_requisition;
+
+				gtk_widget_get_child_requisition (child->widget, &child_requisition);
+
+				child_width = child_requisition.width;
+				child_height = child_requisition.height;
+
+				if (child->expand) {
 					child_width = childsize;
 					child_height = childsize;
-				if (box->homogeneous) {
-					if (nvis_children == 1)
-						child_width = width;
-					else
-						child_width = extra;
-
-					nvis_children -= 1;
-					width -= extra;
-				}else {
-					GtkRequisition child_requisition;
-
-					gtk_widget_get_child_requisition (child->widget, &child_requisition);
-
-					child_width = child_requisition.width + child->padding * 2;
-
-					if (child->expand) {
-						if (nexpand_children == 1)
-							child_width += width;
-						else
-							child_width += extra;
-
-						nexpand_children -= 1;
-						width -= extra;
-					}
 				}
 
-				if (child->fill) {
-					child_allocation.width = MAX (1, (gint) child_width - (gint) child->padding * 2);
-					child_allocation.x = x + child->padding;
-				}else {
-					GtkRequisition child_requisition;
+				cx = x + 0.5*size + radius*sin((double)i*2.0*M_PI/(double)nvis_children);
+				cy = y + 0.5*size + radius*cos((double)i*2.0*M_PI/(double)nvis_children);
 
-					gtk_widget_get_child_requisition (child->widget, &child_requisition);
-					child_allocation.width = child_requisition.width;
-					child_allocation.x = x + (child_width - child_allocation.width) / 2;
-				}
-
-				if (direction == GTK_TEXT_DIR_RTL)
-					child_allocation.x =
-						allocation->x + allocation->width - (child_allocation.x - allocation->x) - child_allocation.width;
+				printf("x:%d y:%d cx:%d cy:%d cw:%d ch:%d\n",x,y,cx,cy, child_width, child_height);
+				child_allocation.width = child_width;
+				child_allocation.height = child_height;
+				child_allocation.x = cx - (child_width)*0.5 ;
+				child_allocation.y = cy - (child_height)*0.5 ;
 
 				gtk_widget_size_allocate (child->widget, &child_allocation);
-
-				x += child_width + box->spacing;
+				i += 1;
 			}
 		}
 
-		x = allocation->x + allocation->width - GTK_CONTAINER (box)->border_width;
-
 		children = box->children;
+		i = -1;
 		while (children) {
 			child = children->data;
 			children = children->next;
 
-			if ((child->pack == GTK_PACK_END) && GTK_WIDGET_VISIBLE (child->widget)) {
+			//TODO:UPDATE from START
+			if ((child->pack == GTK_PACK_END)
+		&& GTK_WIDGET_VISIBLE (child->widget)) {
 				GtkRequisition child_requisition;
+
 				gtk_widget_get_child_requisition (child->widget, &child_requisition);
 
-				if (box->homogeneous) {
+				child_width = child_requisition.width;
+				child_height = child_requisition.height;
+
+				if (child->expand) {
 					child_width = childsize;
 					child_height = childsize;
-
-					nvis_children -= 1;
-					width -= extra;
-				}
-				else {
-					child_width = child_requisition.width + child->padding * 2;
-
-					if (child->expand) {
-						if (nexpand_children == 1)
-							child_width += width;
-						else
-							child_width += extra;
-
-						nexpand_children -= 1;
-						width -= extra;
-					}
 				}
 
-				if (child->fill) {
-					child_allocation.width = MAX (1, (gint) child_width - (gint) child->padding * 2);
-					child_allocation.x = x + child->padding - child_width;
-				}
-				else {
-					child_allocation.width = child_requisition.width;
-					child_allocation.x = x + (child_width - child_allocation.width) / 2 - child_width;
-				}
+				cx = x + size/2 + size*sin((double)(i)*M_PI/(double)nvis_children);
+				cy = y + size/2 + size*cos((double)(i)*M_PI/(double)nvis_children);
 
-				if (direction == GTK_TEXT_DIR_RTL)
-					child_allocation.x =
-						allocation->x + allocation->width - (child_allocation.x - allocation->x) - child_allocation.width;
+				child_allocation.width = child_width;
+				child_allocation.height = child_height;
+				child_allocation.x = cx - (child_width) / 2;
+				child_allocation.y = cy - (child_height) / 2;
 
 				gtk_widget_size_allocate (child->widget, &child_allocation);
-
-				x -= (child_width + box->spacing);
+				i -= 1;
 			}
 		}
 	}
